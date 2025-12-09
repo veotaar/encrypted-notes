@@ -4,7 +4,7 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "@web/components/ui/card";
 import { APITester } from "./APITester";
 import "./index.css";
 
