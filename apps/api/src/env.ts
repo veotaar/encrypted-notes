@@ -4,6 +4,7 @@ const EnvSchema = z.object({
 	NODE_ENV: z.string().default("development"),
 	DATABASE_URL: z.string(),
 	BETTER_AUTH_SECRET: z.string(),
+	BETTER_AUTH_URL: z.url(),
 	PORT: z.coerce.number().default(4000),
 });
 
