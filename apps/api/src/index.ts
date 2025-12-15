@@ -1,7 +1,35 @@
+import { cors } from "@elysiajs/cors";
+import { fromTypes, openapi } from "@elysiajs/openapi";
+import { serverTiming } from "@elysiajs/server-timing";
 import { Elysia } from "elysia";
+import env from "./env";
+import { OpenAPI } from "./lib/authOpenApi";
+import { betterAuth } from "./modules/auth";
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+const app = new Elysia({ prefix: "/api" })
+	.use(
+		cors({
+			origin: "http://localhost:3001",
+			methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+			credentials: true,
+			allowedHeaders: ["Content-Type", "Authorization", "User-Agent"],
+		}),
+	)
+	.use(serverTiming())
+	.use(
+		openapi({
+			references: fromTypes(),
+			documentation: {
+				components: await OpenAPI.components,
+				paths: await OpenAPI.getPaths(),
+			},
+			path: "/openapi",
+		}),
+	)
+	.use(betterAuth)
+	.get("/health", () => "OK")
+	.listen(env.PORT);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
 );
