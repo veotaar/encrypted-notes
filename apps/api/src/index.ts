@@ -30,6 +30,8 @@ const app = new Elysia({ prefix: "/api" })
 	.get("/health", () => "OK")
 	.listen(env.PORT);
 
+export type App = typeof app;
+
 console.log(
 	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
 );

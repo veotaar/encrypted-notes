@@ -10,6 +10,8 @@ export const user = pgTable("user", {
 	email: text("email").notNull().unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),
 	image: text("image"),
+	encryptionSalt: text("encryption_salt").notNull(),
+	wrappedMasterKey: text("wrapped_master_key").notNull(),
 	...timestamps,
 });
 

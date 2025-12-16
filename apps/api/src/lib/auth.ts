@@ -42,6 +42,12 @@ export const auth = betterAuth({
 			verify: ({ hash, password }) => Bun.password.verify(password, hash),
 		},
 	},
+	user: {
+		additionalFields: {
+			encryptionSalt: { type: "string", required: true },
+			wrappedMasterKey: { type: "string", required: true },
+		},
+	},
 	advanced: {
 		database: {
 			generateId: false,
