@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "bun --hot src/index.ts --port=3001",
 		"start": "NODE_ENV=production bun src/index.ts",
-		"build": "bun run build.ts"
+		"build": "bun run build.ts",
+		"test": "bun test"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.0.0",
@@ -27,6 +28,7 @@
 		"tailwind-merge": "^3.4.0"
 	},
 	"devDependencies": {
+		"@happy-dom/global-registrator": "^20.0.11",
 		"@repo/typescript-config": "workspace:*",
 		"@types/bun": "latest",
 		"@types/react": "^19.2.7",
