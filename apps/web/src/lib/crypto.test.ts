@@ -192,7 +192,7 @@ describe("crypto utilities", () => {
 			if (!iv || !ciphertext) {
 				throw new Error("Invalid encrypted format");
 			}
-			const tamperedCiphertext = ciphertext.slice(0, -2) + "00";
+			const tamperedCiphertext = `${ciphertext.slice(0, -2)} 00`;
 			const tampered = `${iv}:${tamperedCiphertext}`;
 
 			expect(decryptData(key, tampered)).rejects.toThrow();

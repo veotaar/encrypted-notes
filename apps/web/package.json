@@ -4,9 +4,12 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun --hot src/index.ts --port=3001",
-		"start": "NODE_ENV=production bun src/index.ts",
-		"build": "bun run build.ts",
+		"generate-routes": "tsr generate",
+		"check-types": "tsc --noEmit",
+		"watch-routes": "tsr watch",
+		"dev": "NODE_ENV=development bun watch-routes & bun --bun --watch src/index.html --port=3001",
+		"start": "NODE_ENV=production bun server.ts",
+		"build": "bun generate-routes && bun run build.ts",
 		"test": "bun test"
 	},
 	"dependencies": {
@@ -30,6 +33,7 @@
 	"devDependencies": {
 		"@happy-dom/global-registrator": "^20.0.11",
 		"@repo/typescript-config": "workspace:*",
+		"@tanstack/router-cli": "^1.141.7",
 		"@types/bun": "latest",
 		"@types/react": "^19.2.7",
 		"@types/react-dom": "^19.2.3",
