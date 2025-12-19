@@ -17,6 +17,7 @@ import {
 } from "@web/components/ui/field";
 import { Input } from "@web/components/ui/input";
 import { signUp } from "@web/lib/auth-client";
+import { useCrypto } from "@web/lib/crypto-context";
 import { z } from "zod";
 import {
 	deriveKeyFromPassword,
@@ -42,6 +43,8 @@ const signupFormSchema = z
 	});
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+	const { setMasterKey } = useCrypto();
+
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -55,20 +58,30 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 			onSubmit: signupFormSchema,
 		},
 		onSubmit: async ({ value }) => {
-			// form is valid here
 			const encryptionSalt = generateSalt();
 			const masterKey = await generateMasterKey();
 
 			const kek = await deriveKeyFromPassword(value.password, encryptionSalt);
 			const wrappedMasterKey = await wrapMasterKey(masterKey, kek);
 
-			await signUp.email({
+			const { data, error } = await signUp.email({
 				name: value.name,
 				email: value.email,
 				password: value.password,
 				wrappedMasterKey,
 				encryptionSalt,
 			});
+
+			if (error || !data?.user) {
+				console.error("Signup failed:", error);
+				return;
+			}
+
+			try {
+				await setMasterKey(masterKey);
+			} catch (err) {
+				console.error("Failed to store master key:", err);
+			}
 		},
 	});
 
