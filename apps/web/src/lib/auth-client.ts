@@ -1,9 +1,5 @@
 import type { auth } from "@api/lib/auth";
-import {
-	adminClient,
-	anonymousClient,
-	inferAdditionalFields,
-} from "better-auth/client/plugins";
+import { adminClient, inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 const API_URL = "http://localhost:3000";
@@ -13,11 +9,7 @@ export const authClient = createAuthClient({
 		credentials: "include",
 	},
 
-	plugins: [
-		anonymousClient(),
-		adminClient(),
-		inferAdditionalFields<typeof auth>(),
-	],
+	plugins: [adminClient(), inferAdditionalFields<typeof auth>()],
 
 	baseURL: API_URL,
 	basePath: "/api/auth",

@@ -1,5 +1,8 @@
+import { WarningIcon } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
-import { Link } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Alert, AlertDescription, AlertTitle } from "@web/components/ui/alert";
 import { Button } from "@web/components/ui/button";
 import {
 	Card,
@@ -16,17 +19,17 @@ import {
 	FieldLabel,
 } from "@web/components/ui/field";
 import { Input } from "@web/components/ui/input";
+import { Spinner } from "@web/components/ui/spinner";
 import { signUp } from "@web/lib/auth-client";
-import { useCrypto } from "@web/lib/crypto-context";
-import { z } from "zod";
 import {
 	deriveKeyFromPassword,
 	generateMasterKey,
 	generateSalt,
 	wrapMasterKey,
-} from "../lib/crypto";
-
-// import { cn } from "@web/lib/utils";
+} from "@web/lib/crypto";
+import { useCrypto } from "@web/lib/crypto-context";
+import { cn } from "@web/lib/utils";
+import { z } from "zod";
 
 const signupFormSchema = z
 	.object({
@@ -44,20 +47,15 @@ const signupFormSchema = z
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 	const { setMasterKey } = useCrypto();
+	const navigate = useNavigate();
 
-	const form = useForm({
-		defaultValues: {
-			name: "",
-			email: "",
-			password: "",
-			confirmPassword: "",
-		},
-		validators: {
-			onChange: signupFormSchema,
-			onBlur: signupFormSchema,
-			onSubmit: signupFormSchema,
-		},
-		onSubmit: async ({ value }) => {
+	const {
+		mutate: signup,
+		isPending,
+		error: signupError,
+		reset: resetMutation,
+	} = useMutation({
+		mutationFn: async (value: z.infer<typeof signupFormSchema>) => {
 			const encryptionSalt = generateSalt();
 			const masterKey = await generateMasterKey();
 
@@ -72,16 +70,39 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 				encryptionSalt,
 			});
 
-			if (error || !data?.user) {
-				console.error("Signup failed:", error);
-				return;
-			}
+			if (error) throw error;
+			if (!data?.user) throw new Error("Signup failed");
 
-			try {
-				await setMasterKey(masterKey);
-			} catch (err) {
-				console.error("Failed to store master key:", err);
-			}
+			// Store the master key (already unwrapped since we just generated it)
+			await setMasterKey(masterKey);
+
+			return data;
+		},
+		onSuccess: async () => {
+			await navigate({ to: "/" });
+		},
+	});
+
+	const form = useForm({
+		defaultValues: {
+			name: "",
+			email: "",
+			password: "",
+			confirmPassword: "",
+		},
+		validators: {
+			onChange: signupFormSchema,
+			// onBlur: signupFormSchema,
+			onSubmit: signupFormSchema,
+		},
+		onSubmit: async ({ value, formApi }) => {
+			resetMutation();
+			signup(value, {
+				onError: () => {
+					formApi.resetField("password");
+					formApi.resetField("confirmPassword");
+				},
+			});
 		},
 	});
 
@@ -93,6 +114,18 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 					Enter your information below to create your account
 				</CardDescription>
 			</CardHeader>
+			<CardContent>
+				{signupError && (
+					<Alert variant="destructive">
+						<WarningIcon />
+						<AlertTitle>{signupError.message || "Signup failed"}</AlertTitle>
+						<AlertDescription>
+							<p>Please verify your information and try again.</p>
+						</AlertDescription>
+					</Alert>
+				)}
+			</CardContent>
+
 			<CardContent>
 				<form
 					id="sign-up-form"
@@ -215,8 +248,20 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 						/>
 						<FieldGroup>
 							<Field>
-								<Button type="submit" form="sign-up-form">
-									Create Account
+								<Button
+									type="submit"
+									form="sign-up-form"
+									className={cn(
+										"hover:cursor-pointer hover:bg-primary/80",
+										isPending && "cursor-not-allowed",
+									)}
+									disabled={isPending}
+								>
+									{isPending ? (
+										<Spinner className="size-4" />
+									) : (
+										"Create Account"
+									)}
 								</Button>
 								<FieldDescription className="px-6 text-center">
 									Already have an account? <Link to="/login">Log in</Link>
