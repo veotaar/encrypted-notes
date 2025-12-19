@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app";
 
+import.meta.hot.accept();
+
 // Render the app
 // biome-ignore lint/style/noNonNullAssertion: r
 const rootElement = document.getElementById("root")!;
