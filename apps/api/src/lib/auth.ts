@@ -3,7 +3,7 @@ import { table } from "@api/db/model";
 import env from "@api/env";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin, anonymous, openAPI } from "better-auth/plugins";
+import { admin, openAPI } from "better-auth/plugins";
 
 export const auth = betterAuth({
 	appName: "Encrypted Notes",
@@ -22,12 +22,6 @@ export const auth = betterAuth({
 		enabled: env.NODE_ENV !== "development",
 		customRules: {
 			"/get-session": false,
-			"/sign-in/anonymous": async () => {
-				return {
-					window: 3600, // seconds (1 hour)
-					max: 4, // max 4 request per window per IP
-				};
-			},
 		},
 	},
 	emailAndPassword: {
@@ -58,5 +52,5 @@ export const auth = betterAuth({
 			partitioned: true,
 		},
 	},
-	plugins: [admin(), openAPI(), anonymous()],
+	plugins: [admin(), openAPI()],
 });

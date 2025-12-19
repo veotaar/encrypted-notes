@@ -8,6 +8,20 @@
       "when": 1765758183430,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766102249126,
+      "tag": "0001_fantastic_supernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766102760604,
+      "tag": "0002_hesitant_mysterio",
+      "breakpoints": true
     }
   ]
 }

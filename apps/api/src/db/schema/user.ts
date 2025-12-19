@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, text } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { idField, timestamps } from "../helpers";
 import { account } from "./account";
 import { session } from "./session";
@@ -12,6 +12,10 @@ export const user = pgTable("user", {
 	image: text("image"),
 	encryptionSalt: text("encryption_salt").notNull(),
 	wrappedMasterKey: text("wrapped_master_key").notNull(),
+	role: text("role").default("user"),
+	banned: boolean("banned"),
+	banReason: text("ban_reason"),
+	banExpires: timestamp("ban_expires"),
 	...timestamps,
 });
 
