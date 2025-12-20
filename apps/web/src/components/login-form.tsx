@@ -1,7 +1,7 @@
 import { WarningIcon } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Alert, AlertDescription, AlertTitle } from "@web/components/ui/alert";
 import { Button } from "@web/components/ui/button";
 import {
@@ -40,6 +40,7 @@ type UserWithEncryption = {
 export function LoginForm({ ...props }: React.ComponentProps<typeof Card>) {
 	const { setMasterKey } = useCrypto();
 	const navigate = useNavigate();
+	const redirect = useSearch({ from: "/login", select: (s) => s.redirect });
 
 	const {
 		mutate: login,
@@ -70,7 +71,7 @@ export function LoginForm({ ...props }: React.ComponentProps<typeof Card>) {
 			return data;
 		},
 		onSuccess: async () => {
-			await navigate({ to: "/" });
+			await navigate({ to: redirect });
 		},
 	});
 
