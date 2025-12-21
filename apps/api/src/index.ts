@@ -2,9 +2,11 @@ import { cors } from "@elysiajs/cors";
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { serverTiming } from "@elysiajs/server-timing";
 import { Elysia } from "elysia";
+import * as z from "zod";
 import env from "./env";
 import { OpenAPI } from "./lib/authOpenApi";
 import { betterAuth } from "./modules/auth";
+import { noteRoutes } from "./modules/note";
 
 const app = new Elysia({ prefix: "/api" })
 	.use(
@@ -24,10 +26,14 @@ const app = new Elysia({ prefix: "/api" })
 				paths: await OpenAPI.getPaths(),
 			},
 			path: "/openapi",
+			mapJsonSchema: {
+				zod: z.toJSONSchema,
+			},
 		}),
 	)
 	.use(betterAuth)
 	.get("/health", () => "OK")
+	.use(noteRoutes)
 	.listen(env.PORT);
 
 export type App = typeof app;
