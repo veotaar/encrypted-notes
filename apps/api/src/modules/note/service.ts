@@ -86,7 +86,7 @@ export async function getNoteById({
 				COALESCE(
 					json_agg(
 						json_build_object('id', ${table.tag.id}, 'content', ${table.tag.content})
-					) FILTER (WHERE ${table.tag.id} IS NOT NULL),
+					) FILTER (WHERE ${table.tag.id} IS NOT NULL AND ${table.noteTag.deletedAt} IS NULL AND ${table.tag.deletedAt} IS NULL),
 					'[]'
 				)
 			`.as("tags"),
@@ -139,7 +139,7 @@ export async function getNotesByUserId({
 				COALESCE(
 					json_agg(
 						json_build_object('id', ${table.tag.id}, 'content', ${table.tag.content})
-					) FILTER (WHERE ${table.tag.id} IS NOT NULL),
+					) FILTER (WHERE ${table.tag.id} IS NOT NULL AND ${table.noteTag.deletedAt} IS NULL AND ${table.tag.deletedAt} IS NULL),
 					'[]'
 				)
 			`.as("tags"),
