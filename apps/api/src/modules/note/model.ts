@@ -16,7 +16,6 @@ export namespace NoteModel {
 		}),
 		select: createSelectSchema(table.note),
 		update: createUpdateSchema(table.note).omit({
-			id: true,
 			createdAt: true,
 			updatedAt: true,
 			deletedAt: true,

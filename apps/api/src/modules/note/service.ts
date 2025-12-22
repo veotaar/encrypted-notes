@@ -1,10 +1,39 @@
 import { db } from "@api/db/db";
 import { table } from "@api/db/model";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import { status } from "elysia";
 import type { NoteModel } from "./model";
 
 export async function createNote(noteData: NoteModel.NoteInsert) {
 	const [note] = await db.insert(table.note).values(noteData).returning();
+	return note;
+}
+
+export async function updateNote({
+	noteId,
+	content,
+	userId,
+}: {
+	noteId: string;
+	content: string;
+	userId: string;
+}) {
+	const [note] = await db
+		.update(table.note)
+		.set({ content })
+		.where(
+			and(
+				eq(table.note.id, noteId),
+				eq(table.note.userId, userId),
+				isNull(table.note.deletedAt),
+			),
+		)
+		.returning();
+
+	if (!note) {
+		throw status(404, "Note not found");
+	}
+
 	return note;
 }
 

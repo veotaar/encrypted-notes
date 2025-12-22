@@ -2,7 +2,7 @@ import { Elysia, status } from "elysia";
 import { z } from "zod";
 import { betterAuth } from "../auth";
 import { NoteModel } from "./model";
-import { createNote, getNotesByUserId } from "./service";
+import { createNote, getNotesByUserId, updateNote } from "./service";
 
 export const noteRoutes = new Elysia()
 	.use(betterAuth)
@@ -42,5 +42,27 @@ export const noteRoutes = new Elysia()
 		},
 		{
 			body: NoteModel.note.insert,
+		},
+	)
+	.patch(
+		"/notes/:noteid",
+		async ({ user, params, body }) => {
+			const noteId = params.noteid;
+
+			const updatedNote = await updateNote({
+				noteId,
+				content: body.content,
+				userId: user.id,
+			});
+
+			return updatedNote;
+		},
+		{
+			params: z.object({
+				noteid: z.string(),
+			}),
+			body: z.object({
+				content: z.string().min(1),
+			}),
 		},
 	);
