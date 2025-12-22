@@ -7,6 +7,7 @@ import env from "./env";
 import { OpenAPI } from "./lib/authOpenApi";
 import { betterAuth } from "./modules/auth";
 import { noteRoutes } from "./modules/note";
+import { tagRoutes } from "./modules/tag";
 
 const app = new Elysia({ prefix: "/api" })
 	.use(
@@ -34,6 +35,7 @@ const app = new Elysia({ prefix: "/api" })
 	.use(betterAuth)
 	.get("/health", () => "OK")
 	.use(noteRoutes)
+	.use(tagRoutes)
 	.listen(env.PORT);
 
 export type App = typeof app;
