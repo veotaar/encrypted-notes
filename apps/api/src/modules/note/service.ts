@@ -6,6 +6,11 @@ import type { NoteModel } from "./model";
 
 export async function createNote(noteData: NoteModel.NoteInsert) {
 	const [note] = await db.insert(table.note).values(noteData).returning();
+
+	if (!note) {
+		throw status(500, "Failed to create note");
+	}
+
 	return note;
 }
 
@@ -35,6 +40,32 @@ export async function updateNote({
 	}
 
 	return note;
+}
+
+export async function deleteNote({
+	noteId,
+	userId,
+}: {
+	noteId: string;
+	userId: string;
+}) {
+	const [deleted] = await db
+		.update(table.note)
+		.set({ deletedAt: sql`(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')` })
+		.where(
+			and(
+				eq(table.note.id, noteId),
+				eq(table.note.userId, userId),
+				isNull(table.note.deletedAt),
+			),
+		)
+		.returning();
+
+	if (!deleted) {
+		throw status(404, "Note not found");
+	}
+
+	return deleted;
 }
 
 export async function getNotesByUserId({

@@ -2,7 +2,12 @@ import { Elysia, status } from "elysia";
 import { z } from "zod";
 import { betterAuth } from "../auth";
 import { NoteModel } from "./model";
-import { createNote, getNotesByUserId, updateNote } from "./service";
+import {
+	createNote,
+	deleteNote,
+	getNotesByUserId,
+	updateNote,
+} from "./service";
 
 export const noteRoutes = new Elysia()
 	.use(betterAuth)
@@ -34,10 +39,6 @@ export const noteRoutes = new Elysia()
 				userId: user.id,
 			});
 
-			if (!newNote) {
-				return status(500, "Failed to create note");
-			}
-
 			return newNote;
 		},
 		{
@@ -46,11 +47,9 @@ export const noteRoutes = new Elysia()
 	)
 	.patch(
 		"/notes/:noteid",
-		async ({ user, params, body }) => {
-			const noteId = params.noteid;
-
+		async ({ user, params: { noteid }, body }) => {
 			const updatedNote = await updateNote({
-				noteId,
+				noteId: noteid,
 				content: body.content,
 				userId: user.id,
 			});
@@ -63,6 +62,22 @@ export const noteRoutes = new Elysia()
 			}),
 			body: z.object({
 				content: z.string().min(1),
+			}),
+		},
+	)
+	.delete(
+		"/notes/:noteid",
+		async ({ user, params: { noteid } }) => {
+			await deleteNote({
+				noteId: noteid,
+				userId: user.id,
+			});
+
+			return status("No Content");
+		},
+		{
+			params: z.object({
+				noteid: z.string(),
 			}),
 		},
 	);
