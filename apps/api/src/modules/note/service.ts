@@ -68,6 +68,54 @@ export async function deleteNote({
 	return deleted;
 }
 
+export async function getNoteById({
+	noteId,
+	userId,
+}: {
+	noteId: string;
+	userId: string;
+}) {
+	const [note] = await db
+		.select({
+			id: table.note.id,
+			content: table.note.content,
+			userId: table.note.userId,
+			createdAt: table.note.createdAt,
+			updatedAt: table.note.updatedAt,
+			tags: sql<Array<{ id: string; content: string }>>`
+				COALESCE(
+					json_agg(
+						json_build_object('id', ${table.tag.id}, 'content', ${table.tag.content})
+					) FILTER (WHERE ${table.tag.id} IS NOT NULL),
+					'[]'
+				)
+			`.as("tags"),
+		})
+		.from(table.note)
+		.leftJoin(table.noteTag, eq(table.note.id, table.noteTag.noteId))
+		.leftJoin(table.tag, eq(table.noteTag.tagId, table.tag.id))
+		.where(
+			and(
+				eq(table.note.id, noteId),
+				eq(table.note.userId, userId),
+				isNull(table.note.deletedAt),
+			),
+		)
+		.groupBy(
+			table.note.id,
+			table.note.content,
+			table.note.userId,
+			table.note.createdAt,
+			table.note.updatedAt,
+		);
+
+	if (!note) {
+		throw status(404, "Note not found");
+	}
+
+	return note;
+}
+
 export async function getNotesByUserId({
 	userId,
 	limit = 50,

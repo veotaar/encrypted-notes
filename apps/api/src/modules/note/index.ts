@@ -5,6 +5,7 @@ import { NoteModel } from "./model";
 import {
 	createNote,
 	deleteNote,
+	getNoteById,
 	getNotesByUserId,
 	updateNote,
 } from "./service";
@@ -24,6 +25,18 @@ export const noteRoutes = new Elysia()
 			query: z.object({
 				cursor: z.string().default("initial"),
 				limit: z.coerce.number().min(1).max(100).default(50),
+			}),
+		},
+	)
+	.get(
+		"/notes/:noteid",
+		async ({ user, params: { noteid } }) => {
+			const note = await getNoteById({ noteId: noteid, userId: user.id });
+			return note;
+		},
+		{
+			params: z.object({
+				noteid: z.string(),
 			}),
 		},
 	)
