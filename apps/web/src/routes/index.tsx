@@ -4,15 +4,12 @@ import { Button } from "@web/components/ui/button";
 import { Spinner } from "@web/components/ui/spinner";
 import { signOut } from "@web/lib/auth-client";
 import { useCrypto } from "@web/lib/crypto-context";
-import { cn } from "@web/lib/utils";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	// Temporary index route component with sign-out button
-	// will be replaced with actual home page later
 	const { auth } = Route.useRouteContext();
 	const { clearMasterKey } = useCrypto();
 	const navigate = useNavigate();
@@ -29,29 +26,49 @@ function RouteComponent() {
 	});
 
 	if (auth.isPending) {
-		return <div>Loading...</div>;
+		return (
+			<div className="flex h-svh items-center justify-center">
+				<Spinner className="size-6" />
+			</div>
+		);
 	}
 
-	if (!auth.isAuthenticated) {
+	if (auth.isAuthenticated) {
 		return (
-			<div>
-				<Link to="/login">Login</Link> | <Link to="/signup">Sign Up</Link>
+			<div className="flex h-svh flex-col items-center justify-center gap-6">
+				<h1 className="font-semibold text-3xl tracking-tight">
+					Encrypted Notes
+				</h1>
+				<p className="text-muted-foreground">
+					Welcome back, {auth.user?.name || auth.user?.email}
+				</p>
+				<Button
+					onClick={() => signOutMutation.mutateAsync()}
+					variant="outline"
+					disabled={signOutMutation.isPending}
+				>
+					{signOutMutation.isPending ? <Spinner /> : "Sign Out"}
+				</Button>
 			</div>
 		);
 	}
 
 	return (
-		<div>
-			<Button
-				onClick={() => signOutMutation.mutateAsync()}
-				className={cn(
-					"hover:cursor-pointer hover:bg-primary/80",
-					signOutMutation.isPending && "cursor-not-allowed",
-				)}
-				disabled={signOutMutation.isPending}
-			>
-				{signOutMutation.isPending ? <Spinner /> : "Sign Out"}
-			</Button>
+		<div className="flex h-svh flex-col items-center justify-center gap-8">
+			<div className="text-center">
+				<h1 className="font-bold text-4xl tracking-tight">Encrypted Notes</h1>
+				<p className="mt-2 text-muted-foreground">
+					Zero knowledge end-to-end encrypted notes.
+				</p>
+			</div>
+			<div className="flex gap-3">
+				<Link to="/login">
+					<Button>Sign In</Button>
+				</Link>
+				<Link to="/signup">
+					<Button variant="outline">Sign Up</Button>
+				</Link>
+			</div>
 		</div>
 	);
 }
